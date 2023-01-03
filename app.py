@@ -1,48 +1,64 @@
+
 import pandas as pd
 import serial
-import json
-import matplotlib.pyplot as plt
-import time
 from blessed import Terminal
-from prettytable import PrettyTable
+from util import*
 
-ser = serial.Serial(
-    port='COM12',
-    baudrate=115200,
-)
 
 isTable = False
 data = b' '
 table = pd.DataFrame([])
-tables = []
 titles = list()
-
-register = list([])
 columnValues   = list()
+
+ports = getPorts()
 
 term = Terminal()
 
 print(term.home + term.clear + term.move_y(term.height // 2))
-print(term.black_on_darkkhaki(term.center('press any key to continue.')))
+print(term.black_on_darkkhaki(term.center('Selecciona el puerto que quieres escuchar.')))
 
-with term.cbreak(), term.hidden_cursor():
-    inp = term.inkey()
+printPorts(0, ports)
 
-print(term.move_down(2) + 'You pressed ' + term.bold(repr(inp)))
+maxPos = len(ports)
+posy = 0
+pressEnter = False 
+
+while not pressEnter:
+    with term.cbreak(), term.hidden_cursor():
+
+        key =  term.inkey()
+        pressEnter = "KEY_ENTER" == repr(key)
+
+        if repr(key) == "KEY_UP":
+            posy = posy-1 if posy > 0 else posy
+            
+        if repr(key) == "KEY_DOWN":
+            posy = posy+1 if posy < maxPos-1 else posy
+           
+        printPorts(posy)
+
+ser = serial.Serial(
+    port=ports[posy],
+    baudrate=115200,
+)
+
+
 print(term.hidden_cursor())
 print(term.clear)
+
 
 while(True):
 
     data = data + ser.readline()
     strData = data.decode('latin1')
-    if b'beginTable' in data:
+    if b'<beginTable>' in data:
         isTable = True
         data = b' '
 
-    if b'endTable' in data  and isTable == True :
+    if b'<endTable>' in data  and isTable == True :
         
-        form = strData.replace('\r\n', "").replace('endTable', "").split(".")     
+        form = strData.replace('\r\n', "").replace('<endTable>', "").split(".")     
         form.pop(0)
         data = b' '
 
