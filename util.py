@@ -1,5 +1,5 @@
 import serial
-
+from blessed import Terminal
 def getPorts():
     ports = ['COM%s' % (i + 1) for i in range(256)]
     encontrados = []
@@ -13,6 +13,7 @@ def getPorts():
     return encontrados
 
 def printPorts(select, ports):
+    term = Terminal()
     print(term.move(0,0))
     for port in ports:
         if select == ports.index(port):

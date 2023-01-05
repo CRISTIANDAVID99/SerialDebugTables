@@ -58,14 +58,14 @@ while(True):
 
     if b'<endTable>' in data  and isTable == True :
         
-        form = strData.replace('\r\n', "").replace('<endTable>', "").split(".")     
+        form = strData.replace('\r\n', "").replace('<endTable>', "").split("<Title>")     
         form.pop(0)
         data = b' '
 
         title = form[0]
         if not(title in titles):
             titles.append(title)
-        column = form[1].split(':')
+        column = form[1].split('<cell>')
         column.pop(0)
 
         
